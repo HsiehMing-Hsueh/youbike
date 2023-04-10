@@ -19,10 +19,10 @@ class Window(tk.Tk):
         #預設選項選擇為信義區
         self.radioStringVar.set('信義區')
         self.area_data = datasource.getInfoFromArea('信義區')
-
+        #建立bottomFrame裝Treeview
         bottomFrame = ttk.LabelFrame(self, text="信義區")
         bottomFrame.pack()
-
+        #建立Treeview
         columns = ('#1', '#2', '#3', '#4', '#5', '#6', '#7')
         tree = ttk.Treeview(bottomFrame, columns=columns, show='headings')
         tree.heading('#1', text='站點')
@@ -44,6 +44,8 @@ class Window(tk.Tk):
         for item in self.area_data:
             tree.insert('', tk.END, values=[item['sna'][11:], item['mday'], item['tot'], item['sbi'], item['bemp'], item['ar'], item['act']])
 
+    def change_Info(self,event):
+        pass
         
     #傳出資料的funtion
     def radio_Event(self):
@@ -51,6 +53,8 @@ class Window(tk.Tk):
         self.area_data = datasource.getInfoFromArea(area_name)
         for item in self.area_data:
             print(item)
+
+    
 #主程式
 def main():
     window =Window()
