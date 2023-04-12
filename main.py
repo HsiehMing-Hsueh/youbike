@@ -1,6 +1,8 @@
 import datasource
 import tkinter as tk
 from tkinter import ttk
+import datetime
+from tkinter.simpledialog import askinteger
 
 sbi_numbers = 3
 bemp_numbers = 3
@@ -8,6 +10,15 @@ bemp_numbers = 3
 class Window(tk.Tk):
     def __init__(self):
         super().__init__()
+        #建立menu
+        self.menubar = tk.Menu(self)
+        self.config(menu=self.menubar)
+
+        self.command_menu = tk.Menu(self.menubar)
+        self.command_menu.add_command(label="設定",command=self.menu_setting_click)
+        self.command_menu.add_command(label="離開", command=self.destroy)
+        self.menubar.add_cascade(label="檔案", menu=self.command_menu)
+
         top_wrapperFrame = ttk.Frame(self)
         top_wrapperFrame.pack(fill=tk.X)
         # 建立行政區的topFrame
@@ -19,17 +30,16 @@ class Window(tk.Tk):
         for i in range(length):
             cols = i % 3
             rows = i // 3
-            ttk.Radiobutton(topFrame, text=datasource.sarea_list[i], value=datasource.sarea_list[i], variable=self.radioStringVar, command=self.radio_Event).grid(
+            ttk.Radiobutton(topFrame, text=datasource.sarea_list[i],value=datasource.sarea_list[i], variable=self.radioStringVar, command=self.radio_Event).grid(
                 column=cols, row=rows, sticky=tk.W, padx=10, pady=10)
         topFrame.pack(side=tk.LEFT)
         # 預設選項選擇為信義區
         self.radioStringVar.set('信義區')
         self.area_data = datasource.getInfoFromArea('信義區')
         # 建立sbi_warningFrame開始-----------------------------
-        sbi_warningFrame = ttk.LabelFrame(top_wrapperFrame, text="可借目前不足站點")
+        self.sbi_warningFrame = ttk.LabelFrame(top_wrapperFrame, text="可借目前不足站點")
         columns = ('#1', '#2', '#3')
-        self.sbi_tree = ttk.Treeview(
-            sbi_warningFrame, columns=columns, show='headings')
+        self.sbi_tree = ttk.Treeview(self.sbi_warningFrame, columns=columns, show='headings')
         self.sbi_tree.heading('#1', text='站點')
         self.sbi_tree.column("#1", minwidth=0, width=200)
         self.sbi_tree.heading('#2', text='可借')
@@ -37,17 +47,19 @@ class Window(tk.Tk):
         self.sbi_tree.heading('#3', text='可還')
         self.sbi_tree.column("#3", minwidth=0, width=30)
         self.sbi_tree.pack(side=tk.LEFT)
-        self.sbi_warning_data = datasource.filter_sbi_warning_data(
-            self.area_data, sbi_numbers)
+        self.sbi_warning_data = datasource.filter_sbi_warning_data(self.area_data, sbi_numbers)
+        
+        sbi_sites_numbers = len(self.sbi_warning_data)
+        self.sbi_warningFrame.configure(text=f"可借不足站點數:{sbi_sites_numbers}")
         for item in self.sbi_warning_data:
             self.sbi_tree.insert('', tk.END, values=[item['sna'][11:], item['sbi'], item['bemp']])
-        sbi_warningFrame.pack(side=tk.LEFT)
+        self.sbi_warningFrame.pack(side=tk.LEFT)
         # 建立sbi_warningFrame結束-----------------------------
+
         # 建立bemp_warningFrame開始----------------------------
-        bemp_warningFrame = ttk.LabelFrame(top_wrapperFrame, text="可還目前不足站點")
+        self.bemp_warningFrame = ttk.LabelFrame(top_wrapperFrame, text="可還目前不足站點")
         columns = ('#1', '#2', '#3')
-        self.bemp_tree = ttk.Treeview(
-            bemp_warningFrame, columns=columns, show='headings')
+        self.bemp_tree = ttk.Treeview(self.bemp_warningFrame, columns=columns, show='headings')
         self.bemp_tree.heading('#1', text='站點')
         self.bemp_tree.column("#1", minwidth=0, width=200)
         self.bemp_tree.heading('#2', text='可借')
@@ -55,19 +67,24 @@ class Window(tk.Tk):
         self.bemp_tree.heading('#3', text='可還')
         self.bemp_tree.column("#3", minwidth=0, width=30)
         self.bemp_tree.pack(side=tk.LEFT)
-        self.bemp_warning_data = datasource.filter_bemp_warning_data(
-            self.area_data, bemp_numbers)
+        self.bemp_warning_data = datasource.filter_bemp_warning_data(self.area_data, bemp_numbers)
+
+        bemp_sites_numbers = len(self.bemp_warning_data)
+        self.bemp_warningFrame.configure(text=f"可還不足站點數:{bemp_sites_numbers}")
         for item in self.bemp_warning_data:
             self.bemp_tree.insert('', tk.END, values=[item['sna'][11:], item['sbi'], item['bemp']])
-        bemp_warningFrame.pack(side=tk.LEFT)
+        self.bemp_warningFrame.pack(side=tk.LEFT)
         # 建立bemp_warningFrame結束----------------------------
 
         # 建立bottomFrame裝Treeview-------------------
-        bottomFrame = ttk.LabelFrame(self, text="信義區")
-        bottomFrame.pack()
-        # 建立Treeview
+        now = datetime.datetime.now()
+        #建立現在時刻
+        nowString = now.strftime("%Y-%m-%d %H:%M:%S")
+        self.bottomFrame = ttk.LabelFrame(self, text=f"信義區-{nowString}")
+        self.bottomFrame.pack()
+        #建立Treeview
         columns = ('#1', '#2', '#3', '#4', '#5', '#6', '#7')
-        self.tree = ttk.Treeview(bottomFrame, columns=columns, show='headings')
+        self.tree = ttk.Treeview(self.bottomFrame, columns=columns, show='headings')
         self.tree.heading('#1', text='站點')
         self.tree.column("#1", minwidth=0, width=200)
         self.tree.heading('#2', text='時間')
@@ -86,24 +103,62 @@ class Window(tk.Tk):
 
         for item in self.area_data:
             self.tree.insert('', tk.END, values=[item['sna'][11:], item['mday'], item['tot'], item['sbi'], item['bemp'], item['ar'], item['act']])
-        # 幫treeview加scrollbar------------------------------------------------
-
-        scrollbar = ttk.Scrollbar(bottomFrame, command=self.tree.yview)
+        #幫treeview加scrollbar------------------------------------------------
+        scrollbar = ttk.Scrollbar(self.bottomFrame, command=self.tree.yview)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.tree.config(yscrollcommand=scrollbar.set)
+        #可借的卷軸
+        sbi_scrollbar = ttk.Scrollbar(self.sbi_warningFrame, command=self.sbi_tree.yview)
+        sbi_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.sbi_tree.config(yscrollcommand=sbi_scrollbar.set)
+        #可還的卷軸
+        bemp_scrollbar = ttk.Scrollbar(self.bemp_warningFrame, command=self.bemp_tree.yview)
+        bemp_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.bemp_tree.config(yscrollcommand=bemp_scrollbar.set)
+
+    def menu_setting_click(self):
+        global sbi_numbers,bemp_numbers
+        retVal = askinteger("目前設定不足數量為:{}","請輸入不足可借可還數量",minvalue=0,maxvalue=5)
+        sbi_numbers =retVal
+        bemp_numbers =retVal
 
     def radio_Event(self):
+        #抓按下去的時間
+        now = datetime.datetime.now()
+        nowString = now.strftime("%Y-%m-%d %H:%M:%S")
+        #刪除資料
         for item in self.tree.get_children():
             self.tree.delete(item)
 
-        area_name = self.radioStringVar.get()
-        self.area_data = datasource.getInfoFromArea(area_name)
+        for item in self.sbi_tree.get_children():
+            self.sbi_tree.delete(item)
 
+        for item in self.bemp_tree.get_children():
+            self.bemp_tree.delete(item)
+
+        area_name = self.radioStringVar.get()
+        #顯示名稱與時間
+        self.bottomFrame.config(text=f"{area_name}-{nowString}")
+        self.area_data = datasource.getInfoFromArea(area_name)
+        #篩選可借站點數並顯示
+        self.sbi_warning_data = datasource.filter_sbi_warning_data(self.area_data, sbi_numbers)
+        sbi_site_numbers = len(self.sbi_warning_data)
+        self.sbi_warningFrame.config(text=f"可借不足站點數:{sbi_site_numbers}")
+        #篩選可還站點數並顯示
+        self.bemp_warning_data = datasource.filter_bemp_warning_data(self.area_data, bemp_numbers)
+        bemp_site_numbers = len(self.bemp_warning_data)
+        self.bemp_warningFrame.configure(text=f"可還不足站點數:{bemp_site_numbers}")
+        #建立資料顯示
         for item in self.area_data:
             self.tree.insert('', tk.END, values=[item['sna'][11:], item['mday'], item['tot'], item['sbi'], item['bemp'], item['ar'], item['act']])
+
+        for item in self.sbi_warning_data:
+            self.sbi_tree.insert('', tk.END, values=[item['sna'][11:], item['sbi'], item['bemp']])
+
+        for item in self.bemp_warning_data:
+            self.bemp_tree.insert('', tk.END, values=[item['sna'][11:], item['sbi'], item['bemp']])
+        
 # 主程式
-
-
 def main():
     window = Window()
     window.title("台北市youbike2.0資訊")

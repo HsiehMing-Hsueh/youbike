@@ -3,8 +3,7 @@ import requests
 sarea_list = None
 data_list = None
 
-
-def getInfo():
+def getInfo()->None:
     global sarea_list, data_list
     # 下載資料
     url = "https://tcgbusfs.blob.core.windows.net/dotapp/youbike/v2/youbike_immediate.json"
