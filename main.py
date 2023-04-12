@@ -2,8 +2,8 @@ import datasource
 import tkinter as tk
 from tkinter import ttk
 
-sbi_number = 3
-bemp_number = 3
+sbi_numbers = 3
+bemp_numbers = 3
 
 class Window(tk.Tk):
     def __init__(self):
@@ -21,19 +21,45 @@ class Window(tk.Tk):
             rows = i // 3
             ttk.Radiobutton(topFrame,text=datasource.sarea_list[i],value=datasource.sarea_list[i],variable=self.radioStringVar,command=self.radio_Event).grid(column=cols,row=rows,sticky=tk.W,padx=10,pady=10)
         topFrame.pack(side=tk.LEFT)
-        #建立sbi_warningFrame--------------------------
-        sbi_warningFrame = ttk.LabelFrame(top_wrapperFrame, text="可借目前不足站點")
-
-        sbi_warningFrame.pack(side=tk.LEFT)
-        #建立bemp_waringFrame
-        bemp_warningFrame = ttk.LabelFrame(top_wrapperFrame, text="可還目前不足站點")
-
-        bemp_warningFrame.pack(side=tk.LEFT)
         #預設選項選擇為信義區
         self.radioStringVar.set('信義區')
         self.area_data = datasource.getInfoFromArea('信義區')
-        #建立warningFrame
-
+        #建立sbi_warningFrame開始-----------------------------
+        sbi_warningFrame = ttk.LabelFrame(top_wrapperFrame, text="可借目前不足站點")
+        columns = ('#1', '#2', '#3')
+        self.sbi_tree = ttk.Treeview(
+            sbi_warningFrame, columns=columns, show='headings')
+        self.sbi_tree.heading('#1', text='站點')
+        self.sbi_tree.column("#1", minwidth=0, width=200)
+        self.sbi_tree.heading('#2', text='可借')
+        self.sbi_tree.column("#2", minwidth=0, width=30)
+        self.sbi_tree.heading('#3', text='可還')
+        self.sbi_tree.column("#3", minwidth=0, width=30)
+        self.sbi_tree.pack(side=tk.LEFT)
+        self.sbi_warning_data = datasource.filter_sbi_warning_data(
+            self.area_data, sbi_numbers)
+        for item in self.sbi_warning_data:
+            self.sbi_tree.insert('', tk.END, values=[item['sna'][11:], item['sbi'], item['bemp']])
+        sbi_warningFrame.pack(side=tk.LEFT)
+        # 建立sbi_warningFrame結束-----------------------------
+        # 建立bemp_warningFrame開始----------------------------
+        bemp_warningFrame = ttk.LabelFrame(top_wrapperFrame, text="可還目前不足站點")
+        columns = ('#1', '#2', '#3')
+        self.bemp_tree = ttk.Treeview(
+            bemp_warningFrame, columns=columns, show='headings')
+        self.bemp_tree.heading('#1', text='站點')
+        self.bemp_tree.column("#1", minwidth=0, width=200)
+        self.bemp_tree.heading('#2', text='可借')
+        self.bemp_tree.column("#2", minwidth=0, width=30)
+        self.bemp_tree.heading('#3', text='可還')
+        self.bemp_tree.column("#3", minwidth=0, width=30)
+        self.bemp_tree.pack(side=tk.LEFT)
+        self.bemp_warning_data = datasource.filter_bemp_warning_data(
+            self.area_data, bemp_numbers)
+        for item in self.bemp_warning_data:
+            self.bemp_tree.insert('', tk.END, values=[item['sna'][11:], item['sbi'], item['bemp']])
+        bemp_warningFrame.pack(side=tk.LEFT)
+        #建立bemp_warningFrame結束----------------------------
 
         #建立bottomFrame裝Treeview-------------------
         bottomFrame = ttk.LabelFrame(self, text="信義區")

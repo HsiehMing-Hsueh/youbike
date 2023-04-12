@@ -20,9 +20,11 @@ def getInfoFromArea(areaName)->list:
     return list(filter_data)
 
 def filter_sbi_warning_data(area_data,numbers)->list:
-    pass
+    filter_data = filter(lambda n: n['sbi'] <= numbers, area_data)
+    return list(filter_data)
 
 
-def filter_bemp_warning_data(area_data) -> list:
-    pass
+def filter_bemp_warning_data(area_data,numbers) -> list:
+    filter_data = filter(lambda n: n['bemp'] <= numbers, area_data)
+    return list(filter_data)
 getInfo()
