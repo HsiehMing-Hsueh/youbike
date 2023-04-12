@@ -15,8 +15,14 @@ def getInfo():
     #排序資料並傳出
     sarea_list = sorted(list(sarea_temp))
 
-def getInfoFromArea(areaName):
+def getInfoFromArea(areaName)->list:
     filter_data = filter(lambda n:n["sarea"] == areaName,data_list)
     return list(filter_data)
 
+def filter_sbi_warning_data(area_data,numbers)->list:
+    pass
+
+
+def filter_bemp_warning_data(area_data) -> list:
+    pass
 getInfo()
