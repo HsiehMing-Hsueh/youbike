@@ -3,6 +3,8 @@ import tkinter as tk
 from tkinter import ttk
 import datetime
 from tkinter.simpledialog import askinteger
+from PIL import Image, ImageTk
+from messageWindow import MapDisplay
 
 sbi_numbers = 3
 bemp_numbers = 3
@@ -18,8 +20,18 @@ class Window(tk.Tk):
         self.command_menu.add_command(label="設定",command=self.menu_setting_click)
         self.command_menu.add_command(label="離開", command=self.destroy)
         self.menubar.add_cascade(label="檔案", menu=self.command_menu)
+        #建立mainFrame
+        mainFrame = ttk.Frame(self)
+        mainFrame.pack(padx=30,pady=50)
+        # ----------------建立logo--------------------
+        logoImage = Image.open('./image/bicycle.png')
+        resizeImage = logoImage.resize((100,100), Image.LANCZOS)
+        self.logoTkimage = ImageTk.PhotoImage(resizeImage)
+        logoLabel = ttk.Label(mainFrame, image=self.logoTkimage)
+        logoLabel.pack(pady=(0,50))
 
-        top_wrapperFrame = ttk.Frame(self)
+        #建立top_wrapperFrame
+        top_wrapperFrame = ttk.Frame(mainFrame)
         top_wrapperFrame.pack(fill=tk.X)
         # 建立行政區的topFrame
         topFrame = ttk.LabelFrame(top_wrapperFrame, text="台北市行政區")
@@ -52,7 +64,7 @@ class Window(tk.Tk):
         sbi_sites_numbers = len(self.sbi_warning_data)
         self.sbi_warningFrame.configure(text=f"可借不足站點數:{sbi_sites_numbers}")
         for item in self.sbi_warning_data:
-            self.sbi_tree.insert('', tk.END, values=[item['sna'][11:], item['sbi'], item['bemp']])
+            self.sbi_tree.insert('', tk.END, values=[item['sna'][11:], item['sbi'], item['bemp']], tags=item['sna'])
         self.sbi_warningFrame.pack(side=tk.LEFT)
         # 建立sbi_warningFrame結束-----------------------------
 
@@ -80,7 +92,7 @@ class Window(tk.Tk):
         now = datetime.datetime.now()
         #建立現在時刻
         nowString = now.strftime("%Y-%m-%d %H:%M:%S")
-        self.bottomFrame = ttk.LabelFrame(self, text=f"信義區-{nowString}")
+        self.bottomFrame = ttk.LabelFrame(mainFrame, text=f"信義區-{nowString}")
         self.bottomFrame.pack()
         #建立Treeview
         columns = ('#1', '#2', '#3', '#4', '#5', '#6', '#7')
@@ -100,9 +112,11 @@ class Window(tk.Tk):
         self.tree.heading('#7', text='狀態')
         self.tree.column("#7", minwidth=0, width=30)
         self.tree.pack(side=tk.LEFT)
-
+        #tree,addItem
         for item in self.area_data:
-            self.tree.insert('', tk.END, values=[item['sna'][11:], item['mday'], item['tot'], item['sbi'], item['bemp'], item['ar'], item['act']])
+            self.tree.insert('', tk.END, values=[item['sna'][11:], item['mday'], item['tot'], item['sbi'], item['bemp'], item['ar'], item['act']],tags=item['sna'])
+        # self.tree bind event
+        self.tree.bind('<<TreeviewSelect>>', self.treeSelected)
         #幫treeview加scrollbar------------------------------------------------
         scrollbar = ttk.Scrollbar(self.bottomFrame, command=self.tree.yview)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
@@ -115,6 +129,21 @@ class Window(tk.Tk):
         bemp_scrollbar = ttk.Scrollbar(self.bemp_warningFrame, command=self.bemp_tree.yview)
         bemp_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.bemp_tree.config(yscrollcommand=bemp_scrollbar.set)
+    #tree的event
+    def treeSelected(self, event):
+        selectedTree = event.widget
+        if len(selectedTree.selection()) == 0: return
+        itemTag = selectedTree.selection()[0]
+        itemDic = selectedTree.item(itemTag)
+        siteName = itemDic['tags'][0]
+        for item in self.area_data:
+            if siteName == item['sna']:
+                selectd_data = item
+                break
+        
+        # 顯示地圖window
+        mapDisplay = MapDisplay(self,selectd_data)
+        
 
     def menu_setting_click(self):
         global sbi_numbers,bemp_numbers
