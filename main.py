@@ -5,10 +5,10 @@ import datetime
 from tkinter.simpledialog import askinteger
 from PIL import Image, ImageTk
 from messageWindow import MapDisplay
+from tkinter.simpledialog import Dialog
 
 sbi_numbers = 3
 bemp_numbers = 3
-
 class Window(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -18,8 +18,10 @@ class Window(tk.Tk):
 
         self.command_menu = tk.Menu(self.menubar)
         self.command_menu.add_command(label="設定",command=self.menu_setting_click)
+        self.command_menu.add_command(label="搜尋", command=self.search_site)
         self.command_menu.add_command(label="離開", command=self.destroy)
-        self.menubar.add_cascade(label="檔案", menu=self.command_menu)
+        self.menubar.add_cascade(label="選項", menu=self.command_menu)
+
         #建立mainFrame
         mainFrame = ttk.Frame(self)
         mainFrame.pack(padx=30,pady=50)
@@ -144,6 +146,15 @@ class Window(tk.Tk):
         # 顯示地圖window
         mapDisplay = MapDisplay(self,selectd_data)
         
+    def search_site(self):
+
+        Keyword = askstring("請輸入關鍵字:{}", "ex:信義區")
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+
+        for item in self.area_data:
+            if Keyword in item['sna'] or item['ar']:
+                self.tree.insert('', tk.END, values=[item['sna'][11:], item['mday'], item['tot'], item['sbi'], item['bemp'], item['ar'], item['act']])
 
     def menu_setting_click(self):
         global sbi_numbers,bemp_numbers
