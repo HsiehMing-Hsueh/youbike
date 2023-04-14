@@ -12,15 +12,18 @@ bemp_numbers = 3
 class Window(tk.Tk):
     def __init__(self):
         super().__init__()
-        #建立menu
+        #建立一個menu
         self.menubar = tk.Menu(self)
         self.config(menu=self.menubar)
-
+        #建立選項menu
         self.command_menu = tk.Menu(self.menubar)
         self.command_menu.add_command(label="設定",command=self.menu_setting_click)
-        self.command_menu.add_command(label="搜尋", command=self.search_site)
         self.command_menu.add_command(label="離開", command=self.destroy)
         self.menubar.add_cascade(label="選項", menu=self.command_menu)
+        #建立搜尋menu
+        self.search_menu = tk.Menu(self.menubar)
+        self.search_menu.add_command(label="搜尋",command=self.search_site)
+        self.menubar.add_cascade(label="搜尋站點",menu=self.search_menu)
 
         #建立mainFrame
         mainFrame = ttk.Frame(self)
