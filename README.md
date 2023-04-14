@@ -61,3 +61,7 @@ def search_site_Total(self):
                 bemp_site_number += 1
             self.bemp_warningFrame.configure(text=f"可還不足站點數:{bemp_site_number}")
 ```
+
+問題:
+1.搜尋完點tree會在主程式的143行出現IndexError
+2.搜尋不寫東西按Cancel會在主程式的160行出現TypeError
