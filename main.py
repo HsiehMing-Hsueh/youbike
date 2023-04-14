@@ -22,7 +22,7 @@ class Window(tk.Tk):
         self.menubar.add_cascade(label="選項", menu=self.command_menu)
         #建立搜尋menu
         self.search_menu = tk.Menu(self.menubar)
-        self.search_menu.add_command(label="搜尋",command=self.search_site)
+        self.search_menu.add_command(label="搜尋",command=self.search_site_Total)
         self.menubar.add_cascade(label="搜尋站點",menu=self.search_menu)
 
         #建立mainFrame
@@ -65,11 +65,11 @@ class Window(tk.Tk):
         self.sbi_tree.column("#3", minwidth=0, width=30)
         self.sbi_tree.pack(side=tk.LEFT)
         self.sbi_warning_data = datasource.filter_sbi_warning_data(self.area_data, sbi_numbers)
-        
+
         sbi_sites_numbers = len(self.sbi_warning_data)
         self.sbi_warningFrame.configure(text=f"可借不足站點數:{sbi_sites_numbers}")
         for item in self.sbi_warning_data:
-            self.sbi_tree.insert('', tk.END, values=[item['sna'][11:], item['sbi'], item['bemp']], tags=item['sna'])
+            self.sbi_tree.insert('', tk.END, values=[item['sna'][11:], item['sbi'], item['bemp']],tags=item['sna'])
         self.sbi_warningFrame.pack(side=tk.LEFT)
         # 建立sbi_warningFrame結束-----------------------------
 
@@ -89,7 +89,7 @@ class Window(tk.Tk):
         bemp_sites_numbers = len(self.bemp_warning_data)
         self.bemp_warningFrame.configure(text=f"可還不足站點數:{bemp_sites_numbers}")
         for item in self.bemp_warning_data:
-            self.bemp_tree.insert('', tk.END, values=[item['sna'][11:], item['sbi'], item['bemp']])
+            self.bemp_tree.insert('', tk.END, values=[item['sna'][11:], item['sbi'], item['bemp']], tags=item['sna'])
         self.bemp_warningFrame.pack(side=tk.LEFT)
         # 建立bemp_warningFrame結束----------------------------
 
@@ -149,22 +149,52 @@ class Window(tk.Tk):
         # 顯示地圖window
         mapDisplay = MapDisplay(self,selectd_data)
         
-    def search_site(self):
-
-        KeyInWord = askstring("請輸入關鍵字:{}", "ex:信義區")
+    def search_site_Total(self):
+        #建立KeyInWord的askstring
+        KeyInWord = askstring("請輸入關鍵字", "ex:信義區")
+        #刪除tree裡面的資料
         for item in self.tree.get_children():
             self.tree.delete(item)
-
+        #增加關鍵字的資料到tree裡面
         for item in self.area_data:
             if KeyInWord in item['sna'] or KeyInWord in item['ar']:
                 self.tree.insert('', tk.END, values=[item['sna'][11:], item['mday'], item['tot'], item['sbi'], item['bemp'], item['ar'], item['act']])
+        #sbi_warnign_data
+        for item in self.sbi_tree.get_children():
+            self.sbi_tree.delete(item)
+        sbi_sites_numbers = 0
+        for item in self.sbi_warning_data:
+            if KeyInWord in item['sna']:
+                self.sbi_tree.insert('', tk.END, values=[item['sna'][11:], item['sbi'], item['bemp']], tags=item['sna'])
+                sbi_sites_numbers += 1
+            self.sbi_warningFrame.configure(text=f"可借不足站點數:{sbi_sites_numbers}")
+        
+        for item in self.bemp_tree.get_children():
+            self.bemp_tree.delete(item)
+        bemp_site_number = 0
+        for item in self.bemp_warning_data:
+            if KeyInWord in item['sna']:
+                self.bemp_tree.insert('', tk.END, values=[item['sna'][11:], item['sbi'], item['bemp']], tags=item['sna'])
+                bemp_site_number += 1
+            self.bemp_warningFrame.configure(text=f"可還不足站點數:{bemp_site_number}")
 
+    '''
+    def search_site_sbi(self):
+        #刪除sbi_tree裡面的資料
+        for item in self.sbi_tree.get_children():
+            self.sbi_tree.delete(item)
+        #增加關鍵字的資料到sbi_tree裡面
+        for item in self.sbi_warning_data :
+            if KeyInWord in item['sna']:
+                self.sbi_tree.insert('', tk.END, [item['sna'][11:], item['sbi'], item['bemp']])
+    '''
+    
     def menu_setting_click(self):
         global sbi_numbers,bemp_numbers
-        retVal = askinteger("目前設定不足數量為:{}","請輸入不足可借可還數量",minvalue=0,maxvalue=5)
+        retVal = askinteger("目前設定不足數量為","請輸入不足可借可還數量",minvalue=0,maxvalue=5)
         sbi_numbers =retVal
         bemp_numbers =retVal
-
+    #
     def radio_Event(self):
         #抓按下去的時間
         now = datetime.datetime.now()
