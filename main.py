@@ -2,7 +2,7 @@ import datasource
 import tkinter as tk
 from tkinter import ttk
 import datetime
-from tkinter.simpledialog import askinteger
+from tkinter.simpledialog import askinteger,askstring
 from PIL import Image, ImageTk
 from messageWindow import MapDisplay
 from tkinter.simpledialog import Dialog
@@ -148,12 +148,12 @@ class Window(tk.Tk):
         
     def search_site(self):
 
-        Keyword = askstring("請輸入關鍵字:{}", "ex:信義區")
+        KeyInWord = askstring("請輸入關鍵字:{}", "ex:信義區")
         for item in self.tree.get_children():
             self.tree.delete(item)
 
         for item in self.area_data:
-            if Keyword in item['sna'] or item['ar']:
+            if KeyInWord in item['sna'] or KeyInWord in item['ar']:
                 self.tree.insert('', tk.END, values=[item['sna'][11:], item['mday'], item['tot'], item['sbi'], item['bemp'], item['ar'], item['act']])
 
     def menu_setting_click(self):
